@@ -86,7 +86,7 @@ def view(fer):
                 decrypted_password = fer.decrypt(encrypted_password.encode()).decode()
                 print(f"User: {user} | Password: {decrypted_password}")
             except Exception:
-                print(f"User: {user} | Password: PASSWORD CRIPTATA PER UN'ALTRA UTENZA")
+                print(f"User: {user} | Password: PASSWORD ENCRYPTED FOR A DIFFERENT USER")
 
 #to add account|password
 def add(fer, salt):

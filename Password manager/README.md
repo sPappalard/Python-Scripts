@@ -92,7 +92,7 @@ Password: facebookpassword456
 Password for Facebook added successfully!
 
 Would you like to add a new password, view existing ones, or login with the master password (add/view/login), press q to quit?: view
-User: Google | Password: PASSWORD CRIPTATA PER UN'ALTRA UTENZA
+User: Google | Password: PASSWORD ENCRYPTED FOR A DIFFERENT USER
 User: Facebook | Password: facebookpassword456
 C:\>
 ```
@@ -100,5 +100,14 @@ C:\>
 #### Explanation:
 The second user is logged in with masterpassword2.
 The output then shows the passwords:
-- Google: The password is encrypted for a different user (masterpassword1), so it cannot be decrypted and is shown as "PASSWORD CRIPTATA PER UN'ALTRA UTENZA."
+- Google: The password is encrypted for a different user (masterpassword1), so it cannot be decrypted and is shown as "PASSWORD ENCRYPTED FOR A DIFFERENT USER"
 - Facebook: This password is decrypted successfully as it was added by the second user with the same master password (masterpassword2).
+
+
+---
+
+### Disclaimer:
+
+This script is for educational purposes only and is **not secure** for handling real passwords. It lacks proper security measures and should not be used in production or to store sensitive data. Always use well-established password managers with strong encryption standards for securing your passwords.
+
+---
