@@ -58,6 +58,7 @@ When you first run the script, you will be prompted to set a master password. Af
 
 ### Example Session (Windows Command Prompt)
 
+
 #### First User (Master Password: `masterpassword1`)
 
 ```cmd
@@ -74,8 +75,12 @@ Password for Google added successfully!
 Would you like to add a new password, view existing ones, or login with the master password (add/view/login), press q to quit?: view
 User: Google | Password: googlepassword123
 
-#### Second User (Master Password: `masterpassword2`)
+C:\>
+```
 
+
+#### Second User (Master Password: `masterpassword2`)
+```cmd
 C:\> python password_manager.py
 Would you like to add a new password, view existing ones, or login with the master password (add/view/login), press q to quit?: login
 Enter your master password (or set a new one): masterpassword2
@@ -89,3 +94,11 @@ Password for Facebook added successfully!
 Would you like to add a new password, view existing ones, or login with the master password (add/view/login), press q to quit?: view
 User: Google | Password: PASSWORD CRIPTATA PER UN'ALTRA UTENZA
 User: Facebook | Password: facebookpassword456
+C:\>
+```
+
+#### Explanation:
+The second user is logged in with masterpassword2.
+The output then shows the passwords:
+- Google: The password is encrypted for a different user (masterpassword1), so it cannot be decrypted and is shown as "PASSWORD CRIPTATA PER UN'ALTRA UTENZA."
+- Facebook: This password is decrypted successfully as it was added by the second user with the same master password (masterpassword2).
