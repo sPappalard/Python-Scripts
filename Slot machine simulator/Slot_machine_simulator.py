@@ -87,7 +87,7 @@ def check_winnings(columns, lines, bet, values):
             symbol_to_check = column[line]          
             if symbol != symbol_to_check:           #If the symbol is different in one of the columns, the line is not winning, and the inner cycle is broken.
                 break
-        else:   #winner case--> if the for cicle comes to end without meeting a break
+        else:   #winner case--> if the for cicle comes to end without meeting a break 
             winnings += values[symbol] * bet
             winning_lines.append(line + 1)
 
