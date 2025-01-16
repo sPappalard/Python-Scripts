@@ -141,6 +141,16 @@ def get_bet():
 
 
 def spin(balance):
+    if balance == 0:
+        print("You have no money left!")
+        additional_deposit = add_deposit()
+        if additional_deposit == 0:
+            print("Thanks for playing! Goodbye.")
+            return -1  # to ends the game
+        else:
+            balance += additional_deposit
+            print(f"New balance is ${balance}")
+
     lines = get_number_of_lines()
     while True:
         bet = get_bet()
@@ -159,8 +169,23 @@ def spin(balance):
     winnings, winning_lines = check_winnings(slots, lines, bet, symbol_value)
     print(f"You won ${winnings}.")
     print(f"You won on lines:", *winning_lines)
-    return winnings - total_bet
+    return winnings - total_bet, balance
 
+
+#to add new deposit
+def add_deposit():
+    while True:
+        amount = input("Your balance is $0. Do you want to add more money? Enter the amount to deposit or 'q' to quit:")
+        if amount.lower() == 'q':
+            return 0
+        if amount.isdigit():
+            amount = int(amount)
+            if amount > 0:
+                return amount
+            else:
+                print("Amount must be greater than 0.")
+        else:
+            print("Please enter a valid number.")
 
 #MAIN
 def main():
@@ -170,9 +195,11 @@ def main():
         answer = input("Press enter to play (q to quit).")
         if answer == "q":
             break
-        balance += spin(balance)
-    if balance == 0:
-        print("You have run out of money!")
-        print(f"Thanks for playing!\nYou left with ${balance}")
+        result, balance = spin(balance)
+        if result == -1:
+            break
+        balance += result
+
+    print(f"Thanks for playing!\nYou left with ${balance}")
 
 main()
