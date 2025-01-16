@@ -1,4 +1,5 @@
 import random
+import time
 
 MAX_LINES = 3
 MAX_BET = 100
@@ -21,6 +22,36 @@ symbol_value = {
     "C": 3,
     "D": 2
 }
+
+#for tracking statistics
+total_winnings = 0
+total_losses = 0
+total_spins = 0
+total_bet = 0       
+no_win_count = 0    
+max_win = 0         
+max_loss = 0  
+balance = 0
+
+def show_statistics():
+    print("\n--- Game Statistics ---")
+    print(f"Total spins: {total_spins}")
+    print(f"Total winnings: ${total_winnings}")
+    print(f"Total losses: ${total_losses}")
+    print(f"Total bet: ${total_bet}")
+    print(f"Number of spins with no winnings: {no_win_count}")
+    print(f"Highest win in a single spin: ${max_win}")
+    print(f"Highest loss in a single spin: ${max_loss}")
+    print(f"Average win per spin: ${total_winnings / total_spins if total_spins > 0 else 0:.2f}")
+
+    if total_bet > 0:
+        net_profit = total_winnings - total_bet
+        roi = (net_profit / total_bet) * 100
+        print(f"Your ROI (Return on Investment) is: {roi:.2f}%")
+    else:
+        print("ROI cannot be calculated because no bets were placed.")
+
+    print("\n💡 Playing roulette isn't worth it! Consider investing your money in an ETF ALL WORLD for better returns over time. 💹")
 
 #simulate the slot machine's spin
 def get_slot_machine_spin(rows, cols, symbols):
@@ -141,65 +172,134 @@ def get_bet():
 
 
 def spin(balance):
+    global total_winnings,total_losses,total_spins,total_bet,no_win_count,max_win,max_loss
+
     if balance == 0:
         print("You have no money left!")
-        additional_deposit = add_deposit()
-        if additional_deposit == 0:
-            print("Thanks for playing! Goodbye.")
-            return -1  # to ends the game
+        balance = add_deposit(balance)
+        if balance == -1:
+            print(f"Thanks for playing!\nYou left with ${balance}")
+            show_statistics()
+            time.sleep(5)
+            exit()
         else:
-            balance += additional_deposit
-            print(f"New balance is ${balance}")
+            main(balance)
+            return
+        
+            
 
     lines = get_number_of_lines()
     while True:
         bet = get_bet()
-        total_bet = bet *lines
+        current_bet = bet *lines
 
-        if total_bet > balance:
+        if current_bet > balance:
             print(f"You do not have enough to bet that amount, your current balance is: ${balance}")
+            retry = input("Do you want add more money (press enter) or quit (type 'q')? ")
+            if retry.lower() == 'q':
+                print(f"Thanks for playing!\nYou left with ${balance}")
+                show_statistics()
+                time.sleep(5)
+                exit()
+            else:
+                balance = add_deposit(balance)
+                main(balance)
         else:
             break
     
-    print(f"You are betting ${bet} on {lines} lines. Total bet is equal to: ${total_bet}")
+    print(f"You are betting ${bet} on {lines} lines. Total bet is equal to: ${current_bet}")
 
     slots = get_slot_machine_spin(ROWS, COLS, symbol_count)
     print_slot_machine(slots)
 
     winnings, winning_lines = check_winnings(slots, lines, bet, symbol_value)
-    print(f"You won ${winnings}.")
-    print(f"You won on lines:", *winning_lines)
-    return winnings - total_bet, balance
+
+    if winnings>0:
+        print(f"🎉 Congratulations!! 🎉")
+        print(f"You won ${winnings}.")
+    else:
+        print("😔 Oh no! You lose... Retry!")
+
+     # Update global statistics
+    total_spins += 1
+    total_winnings += winnings
+    total_bet += current_bet
+
+    loss = current_bet -winnings
+    total_losses += loss
+
+    if winnings == 0:
+        no_win_count += 1
+        if loss > max_loss:
+            max_loss = loss
+    else:
+        if winnings > max_win:
+            max_win = winnings
+        
+    
+    balance -=current_bet
+    balance += winnings
+
+    if balance==0:
+       while True:
+            resp = input("You have no money left! Do you want quit (q) or add more money (add)?: ")
+            if resp == 'add':
+                balance = add_deposit(balance)
+                if balance == -1:
+                    print(f"Thanks for playing!\nYou left with ${balance}")
+                    show_statistics()
+                    time.sleep(5)
+                    exit()
+                else:
+                    main(balance)
+                    return
+            if resp == "q":
+                print(f"Thanks for playing!\nYou left with ${balance}")
+                show_statistics()
+                time.sleep(5)
+                exit()
+            else:
+                print("Please enter a correct response.")
+
+
+    return balance
 
 
 #to add new deposit
-def add_deposit():
+def add_deposit(balance):
     while True:
-        amount = input("Your balance is $0. Do you want to add more money? Enter the amount to deposit or 'q' to quit:")
+        amount = input("Your balance isn't enough. Do you want to add more money? Enter the amount to deposit or 'q' to quit:")
         if amount.lower() == 'q':
-            return 0
+            return -1
         if amount.isdigit():
             amount = int(amount)
             if amount > 0:
-                return amount
+                balance=balance+amount
+                print(f"Transaction done. New balance is ${balance}")
+                return balance
             else:
                 print("Amount must be greater than 0.")
         else:
             print("Please enter a valid number.")
 
 #MAIN
-def main():
-    balance = deposit()
+def main(balance):
+
+    if balance==0:
+        balance = deposit()
+
     while True:
-        print(f"Current balance is ${balance}")
+        if balance != 0:
+            print(f"Current balance is ${balance}")
         answer = input("Press enter to play (q to quit).")
         if answer == "q":
+            show_statistics()
+            print(f"Thanks for playing!\nYou left with ${balance}")
+            exit()
+        balance = spin(balance)
+        if balance == 0:
             break
-        result, balance = spin(balance)
-        if result == -1:
-            break
-        balance += result
 
     print(f"Thanks for playing!\nYou left with ${balance}")
-
-main()
+    
+main(balance)
