@@ -28,12 +28,22 @@ This script is a **Typing Speed Test** application built in Python using the `cu
 5. **Retry or Exit:** After completing or abandoning, choose to retry or exit the application.
 
 ## Dependencies
-- Python 3.6 or later.
-- The curses library (included in the Python standard library for most platforms).
+
+To run this project, ensure you have the following:
+
+- **Python 3.6 or later**: Make sure Python is installed on your system. You can download it from [python.org](https://www.python.org/).
+- **Curses Library**: This library is included in the Python standard library for most Unix-based systems (Linux, macOS).  
+  - **For Windows Users**: The `curses` library is not natively supported. Install the `windows-curses` package by running:
+    ```bash
+    pip install windows-curses
+    ```
+
 
 
 ## Functionality Breakdown
+
 **Sentence Types**
+
 The sentences are generated dynamically in three formats:
 
 - Normal Sentences: Subject-Verb-Object structures with adjectives, adverbs, and conjunctions.
@@ -41,10 +51,12 @@ The sentences are generated dynamically in three formats:
 - Dialogues: Sentences wrapped in dialogue starters and exclamations.
 
 **Real-Time Feedback**
+
 - Correct characters are displayed in green.
 - Incorrect characters are displayed in red.
 
 **Statistics**
+
 After the test, the following metrics are displayed:
 
 - Words per minute (WPM).
@@ -56,19 +68,22 @@ After the test, the following metrics are displayed:
 ## Outup Example
 
 **Start Screen**
-```Welcome to the Speed Typing Test!
+```
+Welcome to the Speed Typing Test!
 Press any key to begin!
-...
+
 ```
 
 **Typing View**
-```The curious cat jumps over a delicious sandwich happily. But it was challenging near the river.
+```
+The curious cat jumps over a delicious sandwich happily. But it was challenging near the river.
 WPM: 45
-...
+
 ```
 
 **Statistics Screen**
-```Test Complete!
+```
+Test Complete!
 
 Words per minute: 45
 Total time: 25 seconds
@@ -77,16 +92,6 @@ Total errors: 3
 Accuracy: 95.16%
 
 Press any key to continue...
-...
+
 ```
 
-## Dependencies
-
-To run this project, ensure you have the following:
-
-- **Python 3.6 or later**: Make sure Python is installed on your system. You can download it from [python.org](https://www.python.org/).
-- **Curses Library**: This library is included in the Python standard library for most Unix-based systems (Linux, macOS).  
-  - **For Windows Users**: The `curses` library is not natively supported. Install the `windows-curses` package by running:
-    ```bash
-    pip install windows-curses
-    ```
