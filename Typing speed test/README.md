@@ -42,7 +42,7 @@ To run this project, ensure you have the following:
 
 ## Functionality Breakdown
 
-**Sentence Types**
+### Sentence Types
 
 The sentences are generated dynamically in three formats:
 
@@ -50,12 +50,12 @@ The sentences are generated dynamically in three formats:
 - Questions: Randomly generated questions.
 - Dialogues: Sentences wrapped in dialogue starters and exclamations.
 
-**Real-Time Feedback**
+### Real-Time Feedback
 
 - Correct characters are displayed in green.
 - Incorrect characters are displayed in red.
 
-**Statistics**
+### Statistics
 
 After the test, the following metrics are displayed:
 
