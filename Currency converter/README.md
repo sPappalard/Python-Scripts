@@ -100,7 +100,7 @@ API errors are captured and handled gracefully.
     Output: Generating a graph for monthly fluctuations EUR -> USD from January 2023 to June 2023...
 
 ```
-*Generating a graph for annual fluctuations GBP -> USD from 2018 to 2023...*
+*A graph window displaying monthly exchange rate fluctuations for EUR -> USD from January 2023 to June 2023 will appear.*
 
 ## Annual Graph Example
 ```
