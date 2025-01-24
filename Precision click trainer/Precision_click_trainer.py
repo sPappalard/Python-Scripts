@@ -2,24 +2,50 @@ import math
 import random
 import time
 import pygame
+import os
+
 pygame.init()
 
-WIDTH, HEIGHT = 800, 600            #dimensions of the game window(pixels)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+ASSET_PATH = os.path.join(BASE_DIR, "sounds")
 
-WIN = pygame.display.set_mode((WIDTH, HEIGHT))      #creates the window
-pygame.display.set_caption("Aim Trainer")
+# windows game dimensions 
+WIDTH, HEIGHT = 1280, 720
+WIN = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Precision Click Trainer")
 
-TARGET_INCREMENT = 4000                          #interval (in milliseconds) at which a new target appears
-TARGET_EVENT = pygame.USEREVENT                 #custom event defined for handling the target generation
+# background colors
+BG_COLORS = {
+    "purple": (128, 0, 128),
+    "orange":(255, 165, 0),
+    "blue": (0, 25, 40), 
+    "red": (40, 0, 0), 
+    }
 
-TARGET_PADDING = 30                         #space from the edges of the window where targets can appear
+DIFFICULTIES = {
+    "very easy": 2000, 
+    "easy": 1000, 
+    "medium": 600, 
+    "hard": 400, 
+    "very hard": 200
+    }
 
-BG_COLOR = (0, 25, 40)                      #background color of the window
-LIVES = 20                                   # numbers of lives the player has
-TOP_BAR_HEIGHT = 50                         # the height of the top bar that displays information
+# global variables
+TARGET_INCREMENT = DIFFICULTIES["medium"]
+BG_COLOR = BG_COLORS["blue"]
+SOUNDS_ENABLED = True
 
-LABEL_FONT = pygame.font.SysFont("comicsans", 24)           #font used to render text in the game (font,dimensions)
+# Sounds
+CLICK_SOUND = pygame.mixer.Sound(os.path.join(ASSET_PATH, "click.wav"))
+MISS_SOUND = pygame.mixer.Sound(os.path.join(ASSET_PATH, "miss.wav"))
+GAME_OVER_SOUND = pygame.mixer.Sound(os.path.join(ASSET_PATH, "game_over.wav"))
 
+#costants of the game
+TARGET_PADDING = 30
+LIVES = 20
+TOP_BAR_HEIGHT = 50
+LABEL_FONT = pygame.font.SysFont("comicsans", 24)
+TARGET_EVENT = pygame.USEREVENT
 
 #represents a target object that the player tries to hit
 class Target:
@@ -58,6 +84,143 @@ class Target:
     def collide(self, x, y):
         dis = math.sqrt((x - self.x)**2 + (y - self.y)**2)
         return dis <= self.size
+
+#to draw a button
+class Button:
+    def __init__(self, x, y, width, height, text, font, color, text_color, hover_color=None, border_color=None, shadow_color=None, border_radius=15):
+        self.rect = pygame.Rect(x, y, width, height)
+        self.text = text
+        self.font = font
+        self.color = color
+        self.text_color = text_color
+        self.hover_color = hover_color or color
+        self.border_color = border_color
+        self.shadow_color = shadow_color
+        self.border_radius = border_radius
+
+
+    def draw(self, win):
+        mouse_pos = pygame.mouse.get_pos()
+        current_color = self.hover_color if self.rect.collidepoint(mouse_pos) else self.color
+        # Draw shadow (if present)
+        if self.shadow_color:
+            shadow_rect = self.rect.move(3, 3)
+            pygame.draw.rect(win, self.shadow_color, shadow_rect, border_radius=self.border_radius)
+
+        # Draw main button
+        pygame.draw.rect(win, current_color, self.rect, border_radius=self.border_radius)
+
+        # Draw border (if present)
+        if self.border_color:
+            pygame.draw.rect(win, self.border_color, self.rect, width=3, border_radius=self.border_radius)
+
+        # Draw text
+        text_surface = self.font.render(self.text, True, self.text_color)
+        win.blit(text_surface, (self.rect.x + (self.rect.width - text_surface.get_width()) // 2, self.rect.y + (self.rect.height - text_surface.get_height()) // 2))
+
+    def is_clicked(self, pos):
+        return self.rect.collidepoint(pos)
+
+# start menu
+def main_menu():
+    global TARGET_INCREMENT, BG_COLOR, SOUNDS_ENABLED
+
+    run = True
+    title_font = pygame.font.SysFont("arialrounded", 50)
+    BUTTON_FONT = pygame.font.SysFont("arialrounded", 40)
+
+
+    difficulty = "medium"
+    bg_color_choice = "blue"
+    sounds_enabled = True
+
+    buttons = {
+        "difficulty": Button(WIDTH // 2 - 300, 200, 600, 70, f"Difficulty: {difficulty.capitalize()}", BUTTON_FONT, (50, 50, 50), "white"),
+        "bg_color": Button(WIDTH // 2 - 300, 300, 600, 70, f"Background color: {bg_color_choice.capitalize()}", BUTTON_FONT, (50, 50, 50), "white"),
+        "sounds": Button(WIDTH // 2 - 300, 400, 600, 70, f"Sounds: {'Active' if sounds_enabled else 'Disabled'}", BUTTON_FONT, (50, 50, 50), "white"),
+        "play": Button(WIDTH // 2 - 300, 600, 600, 70, "Play", BUTTON_FONT, (0, 200, 0), "white")
+    }
+
+    dropdown_open = None
+
+    while run:
+        WIN.fill(BG_COLORS[bg_color_choice])            #menu background is colored according to the current choice
+
+        # Title
+        title_label = title_font.render("Precision Click Trainer - Menu", 1, "white")
+        WIN.blit(title_label, (WIDTH // 2 - title_label.get_width() // 2, 50))
+
+        # Draw the button
+        for key, button in buttons.items():
+            button.draw(WIN)
+
+        # Draw dropdown if it is open
+        dropdown_clicked = False  # to handle the clicks in the dropdow
+        if dropdown_open == "difficulty":
+            pygame.draw.rect(WIN, "white", (WIDTH // 2 - 300, 270, 600, len(DIFFICULTIES) * 60), border_radius=20)  # Background box
+            pygame.draw.rect(WIN, "black", (WIDTH // 2 - 300, 270, 600, len(DIFFICULTIES) * 60), width=3, border_radius=20)  # Border
+
+            for i, key in enumerate(DIFFICULTIES.keys()):
+                option = Button(
+                    x=WIDTH // 2 - 290, y=280 + i * 60, width=580, height=50,
+                    text=key.capitalize(), font=BUTTON_FONT,
+                    color="lightgrey", text_color="black",
+                    hover_color="grey", border_color="black", shadow_color="darkgrey", border_radius=10
+                )
+                option.draw(WIN)
+                if pygame.mouse.get_pressed()[0] and option.is_clicked(pygame.mouse.get_pos()):
+                    difficulty = key
+                    buttons["difficulty"].text = f"Difficulty: {difficulty.capitalize()}"
+                    dropdown_open = None
+                    dropdown_clicked = True
+
+        elif dropdown_open == "bg_color":
+            pygame.draw.rect(WIN, "white", (WIDTH // 2 - 300, 370, 600, len(BG_COLORS) * 60), border_radius=20)  # Background box
+            pygame.draw.rect(WIN, "black", (WIDTH // 2 - 300, 370, 600, len(BG_COLORS) * 60), width=3, border_radius=20)  # Border
+
+            for i, key in enumerate(BG_COLORS.keys()):
+                option = Button(
+                    x=WIDTH // 2 - 290, y=380 + i * 60, width=580, height=50,
+                    text=key.capitalize(), font=BUTTON_FONT,
+                    color="lightgrey", text_color="black",
+                    hover_color="grey", border_color="black", shadow_color="darkgrey", border_radius=10
+                )
+                option.draw(WIN)
+                if pygame.mouse.get_pressed()[0] and option.is_clicked(pygame.mouse.get_pos()):
+                    bg_color_choice = key
+                    buttons["bg_color"].text = f"Background color: {bg_color_choice.capitalize()}"
+                    dropdown_open = None
+                    dropdown_clicked = True
+
+        pygame.display.update()
+
+        #to handle event in start menu
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pos = pygame.mouse.get_pos()
+
+                # if a dropdown options is clicked, ignore the other buttons
+                if dropdown_clicked:
+                    continue
+                
+                if buttons["difficulty"].is_clicked(pos):
+                    dropdown_open = "difficulty" if dropdown_open != "difficulty" else None
+                elif buttons["bg_color"].is_clicked(pos):
+                    dropdown_open = "bg_color" if dropdown_open != "bg_color" else None
+                elif buttons["sounds"].is_clicked(pos):
+                    sounds_enabled = not sounds_enabled
+                    buttons["sounds"].text = f"Sounds: {'Active' if sounds_enabled else 'Disable'}"
+                elif buttons["play"].is_clicked(pos):
+                    TARGET_INCREMENT = DIFFICULTIES[difficulty]
+                    160
+                    SOUNDS_ENABLED = sounds_enabled
+                    run = False
+
+
 
 #to draw the background and all the active targets
 def draw(win, targets):
@@ -142,10 +305,11 @@ def main():
     misses = 0                      #counter of targets missed
     
     start_time = time.time()        #Saves the start time of the game
-
     pygame.time.set_timer(TARGET_EVENT, TARGET_INCREMENT)       #set a timer to generate a TARGET_EVENT at regular intervals defined by TARGET_INCREMENT
 
     #-----main cycle of the game-----
+    main_menu()
+    
     while run:
         clock.tick(60)          #set 60 FPS frame rate
         click = False           #set click=FALSE at the beginning of each frame
@@ -167,19 +331,25 @@ def main():
             if event.type == pygame.MOUSEBUTTONDOWN:        #if a mouse click occurs 
                 click = True
                 clicks += 1
+                if SOUNDS_ENABLED:
+                    CLICK_SOUND.play()
 
         for target in targets:          #for each active targets
             target.update()               #update the dimensions of the target
-
+ 
             if target.size <= 0:
                 targets.remove(target)
                 misses += 1
+                if SOUNDS_ENABLED:
+                    MISS_SOUND.play()
 
             if click and target.collide(*mouse_pos):
                 targets.remove(target)
                 targets_pressed += 1
 
         if misses >= LIVES:
+            if SOUNDS_ENABLED:
+                GAME_OVER_SOUND.play()
             end_screen(WIN, elapsed_time, targets_pressed, clicks)
 
         draw(WIN, targets)                                          #draw all the targets in the windows
