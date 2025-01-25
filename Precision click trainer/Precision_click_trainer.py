@@ -73,12 +73,13 @@ class Target:
         else:
             self.size -= self.GROWTH_RATE
 
-    #to draw concentric circles to represent the target with different colors and sizes
+    #to draw concentric squares to represent the target with different colors and sizes
     def draw(self, win):
-        pygame.draw.circle(win, self.COLOR, (self.x, self.y), self.size)
-        pygame.draw.circle(win, self.SECOND_COLOR,(self.x, self.y), self.size * 0.8)
-        pygame.draw.circle(win, self.COLOR, (self.x, self.y), self.size * 0.6)
-        pygame.draw.circle(win, self.SECOND_COLOR, (self.x, self.y), self.size * 0.4)
+        size = int(self.size)
+        pygame.draw.rect(win, self.COLOR, (self.x - size, self.y - size, size * 2, size * 2))
+        pygame.draw.rect(win, self.SECOND_COLOR, (self.x - size * 0.8, self.y - size * 0.8, size * 1.6, size * 1.6))
+        pygame.draw.rect(win, self.COLOR, (self.x - size * 0.6, self.y - size * 0.6, size * 1.2, size * 1.2))
+        pygame.draw.rect(win, self.SECOND_COLOR, (self.x - size * 0.4, self.y - size * 0.4, size * 0.8, size * 0.8))
 
     #Checks if the mouse click is inside the target by calculating the distance between the mouse position and the target
     def collide(self, x, y):
@@ -189,6 +190,7 @@ def main_menu():
                 if pygame.mouse.get_pressed()[0] and option.is_clicked(pygame.mouse.get_pos()):
                     bg_color_choice = key
                     buttons["bg_color"].text = f"Background color: {bg_color_choice.capitalize()}"
+                    BG_COLOR = BG_COLORS[bg_color_choice] 
                     dropdown_open = None
                     dropdown_clicked = True
 

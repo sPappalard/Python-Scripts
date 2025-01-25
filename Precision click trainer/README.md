@@ -135,7 +135,9 @@ You can replace the audio files with others, as long as they have the same name 
 ## Screenshots
 
 ![Gameplay Screenshot](screenshots/1.png)
+
 ![Gameplay Screenshot](screenshots/2.png)
+
 ![Gameplay Screenshot](screenshots/3.png)
 
 
@@ -148,6 +150,3 @@ If you'd like to contribute to the project, feel free to open a pull request or 
 
 ---
 
-## License
-
-This project is distributed under the MIT License. Feel free to use and modify it as you like.
