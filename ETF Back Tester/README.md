@@ -2,11 +2,6 @@
 
 Welcome to the **ETF Back Tester**! This script allows you to simulate investments in ETFs using two methods: PAC (Periodic Accumulation Plan) and LUMP SUM (one-time investment).
 
-[![Python 3.8+](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
-<img src="https://img.shields.io/badge/Status-Active-brightgreen" alt="Project Status"> 
-<img src="https://img.shields.io/badge/Version-1.0.0-blue" alt="Version"> 
 
 ## Features
 
@@ -70,4 +65,4 @@ The script automatically calculates valid trading dates and purchase/sale values
 Contributions and suggestions are welcome! Feel free to open issues or pull requests in the repository.
 
 ## License
-This project is licensed under the MIT License.
+This project is licensed under the MIT License. [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
