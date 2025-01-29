@@ -65,4 +65,4 @@ The script automatically calculates valid trading dates and purchase/sale values
 Contributions and suggestions are welcome! Feel free to open issues or pull requests in the repository.
 
 ## License
-This project is licensed under the MIT License. [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+This project is licensed under the MIT License --->  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
