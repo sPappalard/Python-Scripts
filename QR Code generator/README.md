@@ -39,3 +39,6 @@ This script allows users to generate customizable QR codes with various options.
    - The script checks the validity of the URL, image format, color input, and other user inputs to ensure correct data is provided.
 
 This structure provides users with a fully customizable QR code generation experience, with options for personalizing colors, adding logos, and selecting file formats.
+
+## License
+This project is licensed under the MIT License --->  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)

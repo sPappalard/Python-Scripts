@@ -99,3 +99,6 @@ Current balance is $110
 
 ## Additional Note
 At the end of the game, a "secret" message will reveal the author's opinion on playing slot machines, encouraging thoughtful financial decisions.
+
+## License
+This project is licensed under the MIT License --->  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)

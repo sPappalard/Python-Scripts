@@ -52,5 +52,8 @@ This script is a fun and interactive "Guess the Number" game with different mode
 4. Guess the number based on the feedback provided.
 5. When you guess correctly or run out of time/attempts, the game ends, and you can choose to play again.
 
+## License
+This project is licensed under the MIT License --->  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 
 

@@ -30,3 +30,6 @@ This script allows users to roll a specified number of dice and displays the res
 2. Once you input the number, an animation will play, followed by the results of the roll.
 3. The dice results will be displayed in a neat ASCII format, showing the faces of the dice.
 4. After viewing the results, you can choose to roll again or exit the game.
+
+## License
+This project is licensed under the MIT License --->  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)

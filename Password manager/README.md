@@ -111,3 +111,6 @@ The output then shows the passwords:
 This script is for educational purposes only and is **not secure** for handling real passwords. It lacks proper security measures and should not be used in production or to store sensitive data. Always use well-established password managers with strong encryption standards for securing your passwords.
 
 ---
+
+## License
+This project is licensed under the MIT License --->  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)

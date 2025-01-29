@@ -115,3 +115,6 @@ API errors are captured and handled gracefully.
 
 ```
 *A graph window displaying annual exchange rate fluctuations for GBP -> USD from 2018 to 2023 will appear.*
+
+## License
+This project is licensed under the MIT License --->  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
