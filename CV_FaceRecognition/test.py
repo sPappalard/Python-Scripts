@@ -10,48 +10,43 @@ from insightface.app import FaceAnalysis
 from sklearn.metrics.pairwise import cosine_similarity
 import threading
 
-# Set color and font for the User Interface
-BG_COLOR = "#2b2b2b"          
-ACCENT_COLOR = "#1abc9c"      
-TEXT_COLOR = "#ecf0f1"        
+# Colori e stile moderni
+BG_COLOR = "#2b2b2b"           # sfondo scuro
+ACCENT_COLOR = "#1abc9c"       # colore di accento (verde chiaro)
+TEXT_COLOR = "#ecf0f1"         # testo bianco
 BUTTON_BG = "#34495e"
 BUTTON_FG = "#ecf0f1"
 FONT_FAMILY = "Helvetica"
 
-#Main application class
 class FaceRecognitionApp:
-    #to initialize the application, to set up the main window and to load the facial recognition model
     def __init__(self, root):
         self.root = root
         self.root.title("Advanced Face Recognition")
         self.root.geometry("900x650")
         self.root.configure(bg=BG_COLOR)
         
-        # Initialize the InsightFace model
+        # Inizializza il modello InsightFace
         self.app = FaceAnalysis(name='buffalo_l')
         self.app.prepare(ctx_id=0, det_size=(640, 640))
         
-        #dictonary to save registrated users' face embeddings 
         self.known_embeddings = {}
-        #load registrated users' from a file
         self.load_data()
         
-        #set up the styles for UI
         self.setup_styles()
-        #set up the UI
         self.setup_ui()
 
-    #To set up styles for frames, buttons and labels
     def setup_styles(self):
         self.style = ttk.Style()
+        # Usa un tema nativo e personalizza le opzioni
         self.style.theme_use('clam')
         self.style.configure("TFrame", background=BG_COLOR)
         self.style.configure("TLabel", background=BG_COLOR, foreground=TEXT_COLOR, font=(FONT_FAMILY, 12))
         self.style.configure("Header.TLabel", font=(FONT_FAMILY, 24, "bold"), foreground=ACCENT_COLOR, background=BG_COLOR)
         self.style.configure("TButton", font=(FONT_FAMILY, 12), padding=10, relief="flat", background=BUTTON_BG, foreground=BUTTON_FG)
-        self.style.map("TButton", background=[("active", ACCENT_COLOR)], foreground=[("active", BG_COLOR)])
+        self.style.map("TButton",
+                       background=[("active", ACCENT_COLOR)],
+                       foreground=[("active", BG_COLOR)])
     
-    #to create UI with a main frame, an header and 4 buttons for different features
     def setup_ui(self):
         main_frame = ttk.Frame(self.root)
         main_frame.pack(expand=True, fill="both", padx=40, pady=40)
@@ -65,26 +60,20 @@ class FaceRecognitionApp:
         ttk.Button(main_frame, text="Non Real-Time Recognition", command=self.non_real_time_recognition, **btn_style).pack(pady=10)
         ttk.Button(main_frame, text="Manage Registered Users", command=self.manage_users, **btn_style).pack(pady=10)
 
-    #to load face embeddings from a .pkl file
     def load_data(self):
         if os.path.exists('embeddings.pkl'):
             with open('embeddings.pkl', 'rb') as f:
                 self.known_embeddings = pickle.load(f)
 
-    #to save face embeddings to a .pkl file
     def save_data(self):
         with open('embeddings.pkl', 'wb') as f:
             pickle.dump(self.known_embeddings, f)
 
-    #to register a new user
     def register_user(self):
-        files = filedialog.askopenfilenames(title="Select 3 Face Images", filetypes=(("Image files", "*.jpg *.jpeg *.png"),))        
-        
-        if len(files) < 3:
-            messagebox.showerror("Error", "Please select at least 3 images")
-            return
-        
-        if len(files) == 0:
+        files = filedialog.askopenfilenames(title="Select 3 Face Images",
+                                            filetypes=(("Image files", "*.jpg *.jpeg *.png"),))
+        if len(files) != 3:
+            messagebox.showerror("Error", "Please select exactly 3 images")
             return
 
         name = simpledialog.askstring("Input", "Enter user name:")
@@ -100,16 +89,12 @@ class FaceRecognitionApp:
                 return
             embeddings.append(faces[0].embedding)
 
-        #calculate the average embedding 
         avg_embedding = np.mean(embeddings, axis=0)
-        #save the average embedding
         self.known_embeddings[name] = avg_embedding
-
         self.save_data()
         self.update_registered_list()
         messagebox.showinfo("Success", "User registered successfully!")
 
-    #To start a window for real-time facial recognition using the webcam.
     def start_recognition(self):
         recognition_window = tk.Toplevel(self.root)
         recognition_window.title("Face Recognition Live")
@@ -119,22 +104,16 @@ class FaceRecognitionApp:
         video_panel.pack(padx=10, pady=10)
 
         self.cap = cv2.VideoCapture(0)
-        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
-        #create a stop event to indicate when the thread should be stopped
         self.stop_event = threading.Event()
-        
-        #similarity threshold for the face to match one of the registered users (minimum 60%)
-        self.threshold = 0.6  
+        self.threshold = 0.6  # similarità
 
-        #create a thread to processing frames
         self.thread = threading.Thread(target=self.process_frame, args=(video_panel,))
-        #for thread will automatically end when the main program closes.
-        self.thread.daemon = True      
+        self.thread.daemon = True
         self.thread.start()
 
-        #function that will be called when the user attempts to close the secondary window--> This function handles clean thread shutdown and release of webcam resources.
         def on_close():
             self.stop_event.set()
             self.cap.release()
@@ -142,22 +121,14 @@ class FaceRecognitionApp:
 
         recognition_window.protocol("WM_DELETE_WINDOW", on_close)
 
-    #to elaborate each webcam frames, to detec faces and to compare embeddings with stored ones.
     def process_frame(self, video_panel):
-        #continues to run until the stop_event is set.
         while not self.stop_event.is_set():
-            #read the webcam frame--> return ret (boolean that indicates if the reading eas successfull) + frame (the capture image)
             ret, frame = self.cap.read()
             if ret:
-                #facial recognition
                 faces = self.app.get(frame)
-                #for each faces detected
                 for face in faces:
-                    #exctract coordinates of the face delimiter
                     x1, y1, x2, y2 = face.bbox.astype(int)
-                    #draw the rectangle that delimites the face
                     cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-#######################
                     max_similarity = 0
                     identity = "Unknown"
                     for name, saved_embedding in self.known_embeddings.items():
@@ -165,7 +136,6 @@ class FaceRecognitionApp:
                         if similarity > max_similarity and similarity > self.threshold:
                             max_similarity = similarity
                             identity = name
-
                     color = (0, 255, 0) if identity != "Unknown" else (0, 0, 255)
                     cv2.rectangle(frame, (x1, y2 - 35), (x2, y2), color, cv2.FILLED)
                     cv2.putText(frame, f"{identity} ({max_similarity:.2f})", (x1 + 6, y2 - 6),
