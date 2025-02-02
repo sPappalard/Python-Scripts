@@ -80,6 +80,9 @@ class FaceRecognitionApp:
     def register_user(self):
         files = filedialog.askopenfilenames(title="Select 3 Face Images", filetypes=(("Image files", "*.jpg *.jpeg *.png"),))        
         
+        if len(files) == 0:
+            return
+
         if len(files) < 3:
             messagebox.showerror("Error", "Please select at least 3 images")
             return
