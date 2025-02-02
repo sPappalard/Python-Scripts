@@ -311,41 +311,18 @@ class FaceRecognitionApp:
 
         #Check if there are recognized faces in the recognized_faces list
         if recognized_faces:
-            zoomed_faces = []
+            annotated_image = img.copy()
             #For each face recognized
             for face, identity, sim in recognized_faces:
-                #Extract the coordinates of the bounding box, add a margin and crop the image
                 x1, y1, x2, y2 = face.bbox.astype(int)
-                h, w, _ = img.shape
-                margin = 20
-                x1m = max(x1 - margin, 0)
-                y1m = max(y1 - margin, 0)
-                x2m = min(x2 + margin, w)
-                y2m = min(y2 + margin, h)
-                crop = img[y1m:y2m, x1m:x2m].copy()
+                cv2.rectangle(annotated_image, (x1, y1), (x2, y2), (0, 255, 0), 3)
 
-                #Draw a green box around the face and add the identity name.
-                cv2.rectangle(crop, (0, 0), (crop.shape[1]-1, crop.shape[0]-1), (0, 255, 0), 3)
-                cv2.putText(crop, identity, (5, crop.shape[0]-10), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 255, 0), 3)
-                
-                #Resize the cropped image and add it to the zoomed_faces list.
-                zoom = cv2.resize(crop, (300, 300))
-                zoomed_faces.append(zoom)
-            
-            #If there are more enlarged faces, it combines them horizontally.
-            if len(zoomed_faces) > 1:
-                combined = np.hstack(zoomed_faces)
-            else:
-                combined = zoomed_faces[0]
-
-            #Converts the combined image to RGB    
-            combined_rgb = cv2.cvtColor(combined, cv2.COLOR_BGR2RGB)
-            #Converts the combined image to PIL image
-            pil_img = Image.fromarray(combined_rgb)
-            #create Tkinter image (that can be displayed in the Label widget)
+            annotated_image = cv2.cvtColor(annotated_image, cv2.COLOR_BGR2RGB)
+            pil_img = Image.fromarray(annotated_image)
+            pil_img.thumbnail((300, 300))
             self.nrt_image = ImageTk.PhotoImage(pil_img)
-            #Update the Label widget to display the updated image.
             self.nrt_image_label.configure(image=self.nrt_image)
+
             
             #Show names of recognized faces in a messagebox
             recognized_names = ', '.join([identity for (_, identity, _) in recognized_faces])
@@ -353,12 +330,12 @@ class FaceRecognitionApp:
         
         #Management of unrecognized faces (draw red squares around the faces detected)
         else:
-            annotated_image = img.copy()
+            annotated_image2 = img.copy()
             for face in faces:
                 x1, y1, x2, y2 = face.bbox.astype(int)
-                cv2.rectangle(annotated_image, (x1, y1), (x2, y2), (0, 0, 255), 2)
-            annotated_image = cv2.cvtColor(annotated_image, cv2.COLOR_BGR2RGB)
-            pil_img = Image.fromarray(annotated_image)
+                cv2.rectangle(annotated_image2, (x1, y1), (x2, y2), (0, 0, 255), 15)
+            annotated_image2 = cv2.cvtColor(annotated_image2, cv2.COLOR_BGR2RGB)
+            pil_img = Image.fromarray(annotated_image2)
             pil_img.thumbnail((300, 300))
             self.nrt_image = ImageTk.PhotoImage(pil_img)
             self.nrt_image_label.configure(image=self.nrt_image)
