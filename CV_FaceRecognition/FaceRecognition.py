@@ -239,7 +239,7 @@ class FaceRecognitionApp:
         ttk.Label(right_frame, text="Registered Users", font=(FONT_FAMILY, 14)).pack(pady=10)
         
         self.registered_listbox = tk.Listbox(right_frame, selectmode=tk.MULTIPLE, 
-                                           font=(FONT_FAMILY, 16), bg=BUTTON_BG, fg=TEXT_COLOR, selectbackground=ACCENT_COLOR)
+                                           font=(FONT_FAMILY, 20), bg=BUTTON_BG, fg=TEXT_COLOR, selectbackground=ACCENT_COLOR)
         self.registered_listbox.pack(expand=True, fill="both", padx=10, pady=10)
         self.update_registered_list()
 
@@ -268,10 +268,10 @@ class FaceRecognitionApp:
         if hasattr(self, 'registered_listbox'):
             self.registered_listbox.delete(0, tk.END)
             if not self.known_embeddings:
-                self.registered_listbox.insert(tk.END, "No registered user".center(53))
+                self.registered_listbox.insert(tk.END, "No registered user")
             else:
                 for name in self.known_embeddings.keys():
-                    self.registered_listbox.insert(tk.END, name.center(53))
+                    self.registered_listbox.insert(tk.END, name)
 
     #to Check if the faces in the uploaded image match those of registered users
     def verify_nrt_image(self):
@@ -383,7 +383,7 @@ class FaceRecognitionApp:
         lbl.pack(pady=10)
         
         listbox = tk.Listbox(self.manage_users_frame, selectmode=tk.MULTIPLE, 
-                           font=(FONT_FAMILY, 16), bg=BUTTON_BG, fg=TEXT_COLOR, 
+                           font=(FONT_FAMILY, 20), bg=BUTTON_BG, fg=TEXT_COLOR, 
                            selectbackground=ACCENT_COLOR)
         listbox.pack(expand=True, fill="both", padx=10, pady=10)
         
@@ -391,7 +391,7 @@ class FaceRecognitionApp:
         
         # Population of the user list
         for name in self.known_embeddings.keys():
-            listbox.insert(tk.END, name.center(125))
+            listbox.insert(tk.END, name)
         
         # Delete selected users functionality
         def delete_selected():

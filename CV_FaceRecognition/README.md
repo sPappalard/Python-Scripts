@@ -4,8 +4,8 @@
 
 ## Features
 
-### Main Game Mode
-- Register new users with multiple face images
+### Registration
+- Register new users using at least 3 face images
 - Automatic face embedding calculation and storage
 - Support for multiple face angles and expressions
 
@@ -24,14 +24,6 @@
 ### User Management
 - View all registered users
 - Delete single or multiple users
-- Secure storage of face embeddings
-- Easy-to-use interface for user administration
-
-### Modern User Interface
-- Clean and intuitive design
-- Dark mode theme
-- Responsive layout
-- Clear navigation between features
 
 ## Dependencies
 
@@ -72,18 +64,16 @@ python face_recognition_app.py
 From the main menu, you can:
 
 ### Register New User
-- Select 3 different face images of the user
+- Select at least 3 different face images of the user
 - Enter the user's name
 - Wait for registration confirmation
 
 ### Real-Time Recognition
-- Click "Real-Time Recognition"
 - Position face in front of webcam
 - View real-time recognition results
 - Click "Back to Menu" to exit
 
 ### Non Real-Time Recognition
-- Click "Non Real-Time Recognition"
 - Load an image using "Load Image"
 - Click "Verify" to analyze faces
 - View recognition results
@@ -112,21 +102,6 @@ From the main menu, you can:
    - Saves data in a pickle file for persistence
    - Validates face presence in registration images
 
-### UI Components
-
-- Custom styled frames and buttons
-- Consistent color scheme:
-  - Background: #2b2b2b
-  - Accent: #1abc9c
-  - Text: #ecf0f1
-  - Button Background: #34495e
-
-## Performance Considerations
-
-- Real-time recognition runs in a separate thread
-- Optimized for 640x640 detection size
-- Supports multiple face detection in single frames
-- Efficient embedding storage and comparison
 
 ## Data Storage
 
@@ -138,7 +113,7 @@ The application stores face embeddings in a local file:
 
 ## Screenshots
 
-*[Insert your application screenshots here]*
+
 
 ## Contributions
 
@@ -150,4 +125,4 @@ Contributions are welcome! Feel free to:
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License --->  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
