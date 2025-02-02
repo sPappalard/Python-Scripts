@@ -24,7 +24,7 @@ class FaceRecognitionApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Advanced Face Recognition")
-        self.root.geometry("900x650")
+        self.root.geometry("800x650")
         self.root.configure(bg=BG_COLOR)
         
         # Initialize the InsightFace model
@@ -38,8 +38,8 @@ class FaceRecognitionApp:
         
         #set up the styles for UI
         self.setup_styles()
-        #set up the UI
-        self.setup_ui()
+        #set up the main UI
+        self.setup_main_ui()
 
     #To set up styles for frames, buttons and labels
     def setup_styles(self):
@@ -51,19 +51,19 @@ class FaceRecognitionApp:
         self.style.configure("TButton", font=(FONT_FAMILY, 12), padding=10, relief="flat", background=BUTTON_BG, foreground=BUTTON_FG)
         self.style.map("TButton", background=[("active", ACCENT_COLOR)], foreground=[("active", BG_COLOR)])
     
-    #to create UI with a main frame, an header and 4 buttons for different features
-    def setup_ui(self):
-        main_frame = ttk.Frame(self.root)
-        main_frame.pack(expand=True, fill="both", padx=40, pady=40)
+    #to create main UI with a main frame, an header and 4 buttons for different features
+    def setup_main_ui(self):
+        self.main_frame = ttk.Frame(self.root)
+        self.main_frame.pack(expand=True, fill="both", padx=40, pady=40)
         
-        header = ttk.Label(main_frame, text="Advanced Face ID System", style="Header.TLabel")
+        header = ttk.Label(self.main_frame, text="Advanced Face ID System", style="Header.TLabel")
         header.pack(pady=(0, 30))
         
         btn_style = {"width": 30}
-        ttk.Button(main_frame, text="Register New User", command=self.register_user, **btn_style).pack(pady=10)
-        ttk.Button(main_frame, text="Real-Time Recognition", command=self.start_recognition, **btn_style).pack(pady=10)
-        ttk.Button(main_frame, text="Non Real-Time Recognition", command=self.non_real_time_recognition, **btn_style).pack(pady=10)
-        ttk.Button(main_frame, text="Manage Registered Users", command=self.manage_users, **btn_style).pack(pady=10)
+        ttk.Button(self.main_frame, text="Register New User", command=self.register_user, **btn_style).pack(pady=10)
+        ttk.Button(self.main_frame, text="Real-Time Recognition", command=self.show_real_time_ui, **btn_style).pack(pady=10)
+        ttk.Button(self.main_frame, text="Non Real-Time Recognition", command=self.show_non_real_time_ui, **btn_style).pack(pady=10)
+        ttk.Button(self.main_frame, text="Manage Registered Users", command=self.show_manage_users_ui, **btn_style).pack(pady=10)
 
     #to load face embeddings from a .pkl file
     def load_data(self):
@@ -109,38 +109,47 @@ class FaceRecognitionApp:
         self.update_registered_list()
         messagebox.showinfo("Success", "User registered successfully!")
 
-    #To start a window for real-time facial recognition using the webcam.
-    def start_recognition(self):
-        recognition_window = tk.Toplevel(self.root)
-        recognition_window.title("Face Recognition Live")
-        recognition_window.configure(bg=BG_COLOR)
+    # ========================================================================
+    # Real-Time Recognition UI and Logic
+    # ========================================================================
+    def show_real_time_ui(self):
+        # Hide main menu
+        self.main_frame.pack_forget()
         
-        video_panel = tk.Label(recognition_window, bg=BG_COLOR)
-        video_panel.pack(padx=10, pady=10)
-
+        # Create real-time recognition frame
+        self.real_time_frame = ttk.Frame(self.root)
+        self.real_time_frame.pack(expand=True, fill="both")
+        
+        # Add back to menu button
+        ttk.Button(self.real_time_frame, text="Back to Menu", command=self.close_real_time_ui, 
+                 style="TButton").pack(side="top", anchor="nw", padx=10, pady=10)
+        
+        # Video panel setup
+        video_panel = tk.Label(self.real_time_frame, bg=BG_COLOR)
+        video_panel.pack(expand=True, fill="both", padx=10, pady=10)
+        
+        # Initialize webcam
         self.cap = cv2.VideoCapture(0)
-        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
-
-        #create a stop event to indicate when the thread should be stopped
-        self.stop_event = threading.Event()
+        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 800)
+        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 600)
         
-        #similarity threshold for the face to match one of the registered users (minimum 60%)
-        self.threshold = 0.6  
-
-        #create a thread to processing frames
+        # Thread setup for frame processing
+        self.stop_event = threading.Event()
+        self.threshold = 0.6
+        
         self.thread = threading.Thread(target=self.process_frame, args=(video_panel,))
-        #for thread will automatically end when the main program closes.
-        self.thread.daemon = True      
+        self.thread.daemon = True
         self.thread.start()
 
-        #function that will be called when the user attempts to close the secondary window--> This function handles clean thread shutdown and release of webcam resources.
-        def on_close():
-            self.stop_event.set()
+    def close_real_time_ui(self):
+        # Stop the thread and release resources
+        self.stop_event.set()
+        if hasattr(self, 'cap'):
             self.cap.release()
-            recognition_window.destroy()
-
-        recognition_window.protocol("WM_DELETE_WINDOW", on_close)
+        # Destroy the real-time frame
+        self.real_time_frame.destroy()
+        # Show main menu
+        self.main_frame.pack(expand=True, fill="both", padx=40, pady=40)
 
     #to elaborate each webcam frames, to detec faces and to compare embeddings with stored ones.
     def process_frame(self, video_panel):
@@ -157,101 +166,132 @@ class FaceRecognitionApp:
                     x1, y1, x2, y2 = face.bbox.astype(int)
                     #draw the rectangle that delimites the face
                     cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-#######################
+
                     max_similarity = 0
                     identity = "Unknown"
+                    #Comparison of embeddings
                     for name, saved_embedding in self.known_embeddings.items():
                         similarity = cosine_similarity([face.embedding], [saved_embedding])[0][0]
                         if similarity > max_similarity and similarity > self.threshold:
                             max_similarity = similarity
                             identity = name
 
+                    #If the identity is known, the color is green (0, 255, 0), otherwise it is red (0, 0, 255).
                     color = (0, 255, 0) if identity != "Unknown" else (0, 0, 255)
                     cv2.rectangle(frame, (x1, y2 - 35), (x2, y2), color, cv2.FILLED)
                     cv2.putText(frame, f"{identity} ({max_similarity:.2f})", (x1 + 6, y2 - 6),
                                 cv2.FONT_HERSHEY_DUPLEX, 0.7, (255, 255, 255), 1)
-
+                
+                #Converts the video frame from BGR (used by OpenCV) to RGB (used by PIL).
                 img_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                #Corverts to a PIL image
                 img_pil = Image.fromarray(img_rgb)
+                #Converts to a Tkinter image (that can be displayed in the Label widget)
                 imgtk = ImageTk.PhotoImage(image=img_pil)
                 video_panel.imgtk = imgtk
                 video_panel.configure(image=imgtk)
+            #update Tkinter User Interface    
             self.root.update()
 
-    def non_real_time_recognition(self):
-        nrt_window = tk.Toplevel(self.root)
-        nrt_window.title("Non Real-Time Face Recognition")
-        nrt_window.geometry("900x600")
-        nrt_window.configure(bg=BG_COLOR)
-
-        main_frame = ttk.Frame(nrt_window)
-        main_frame.pack(expand=True, fill="both", padx=20, pady=20)
-
-        left_frame = ttk.Frame(main_frame)
+    # ========================================================================
+    # Non Real-Time Recognition UI and Logic
+    # ========================================================================
+    def show_non_real_time_ui(self):
+        # Hide main menu
+        self.main_frame.pack_forget()
+        
+        # Create non-real-time frame
+        self.nrt_frame = ttk.Frame(self.root)
+        self.nrt_frame.pack(expand=True, fill="both")
+        
+        # Back to menu button
+        ttk.Button(self.nrt_frame, text="Back to Menu", command=lambda: [self.nrt_frame.destroy(), 
+                  self.main_frame.pack(expand=True, fill="both", padx=40, pady=40)], 
+                 style="TButton").pack(side="top", anchor="nw", padx=10, pady=10)
+        
+        # Main content frame
+        main_content = ttk.Frame(self.nrt_frame)
+        main_content.pack(expand=True, fill="both", padx=20, pady=20)
+        main_content.columnconfigure(0, weight=1)
+        main_content.columnconfigure(1, weight=1)
+        main_content.rowconfigure(0, weight=1)
+        
+        # Left frame - Image verification
+        left_frame = ttk.Frame(main_content)
         left_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
         left_frame.columnconfigure(0, weight=1)
         left_frame.rowconfigure(1, weight=1)
-
-        lbl_title = ttk.Label(left_frame, text="Upload an Image to Verify", font=(FONT_FAMILY, 14))
-        lbl_title.pack(pady=10)
-
-        self.nrt_image_path = None
-        self.nrt_image = None
-
+        
+        ttk.Label(left_frame, text="Upload an Image to Verify", font=(FONT_FAMILY, 14)).pack(pady=10)
+        
         self.nrt_image_label = tk.Label(left_frame, text="No image loaded", bg=BG_COLOR, fg=TEXT_COLOR)
-        self.nrt_image_label.pack(pady=10)
-
-        ttk.Button(left_frame, text="Load Image", command=self.load_nrt_image).pack(pady=10)
-        ttk.Button(left_frame, text="Verify", command=self.verify_nrt_image).pack(pady=10)
-
-        right_frame = ttk.Frame(main_frame)
+        self.nrt_image_label.pack(expand=True, fill="both", padx=10, pady=10)
+        
+        ttk.Button(left_frame, text="Load Image", command=self.load_nrt_image, style="TButton").pack(pady=10)
+        ttk.Button(left_frame, text="Verify", command=self.verify_nrt_image, style="TButton").pack(pady=10)
+        
+        # Right frame - Registered users
+        right_frame = ttk.Frame(main_content)
         right_frame.grid(row=0, column=1, sticky="nsew", padx=10, pady=10)
         right_frame.columnconfigure(0, weight=1)
         right_frame.rowconfigure(0, weight=1)
-
-        lbl_registered = ttk.Label(right_frame, text="Registered Users", font=(FONT_FAMILY, 14))
-        lbl_registered.pack(pady=10)
-
-        self.registered_listbox = tk.Listbox(right_frame, font=(FONT_FAMILY, 12), bg=BUTTON_BG, fg=TEXT_COLOR, selectbackground=ACCENT_COLOR)
+        
+        ttk.Label(right_frame, text="Registered Users", font=(FONT_FAMILY, 14)).pack(pady=10)
+        
+        self.registered_listbox = tk.Listbox(right_frame, selectmode=tk.MULTIPLE, 
+                                           font=(FONT_FAMILY, 16), bg=BUTTON_BG, fg=TEXT_COLOR, selectbackground=ACCENT_COLOR)
         self.registered_listbox.pack(expand=True, fill="both", padx=10, pady=10)
         self.update_registered_list()
 
+    #to load the image
     def load_nrt_image(self):
-        file_path = filedialog.askopenfilename(title="Select an Image",
-                                               filetypes=(("Image files", "*.jpg *.jpeg *.png"),))
+        file_path = filedialog.askopenfilename(title="Select an Image", filetypes=(("Image files", "*.jpg *.jpeg *.png"),))
         if file_path:
+            #save the path
             self.nrt_image_path = file_path
+            #read the image
             img = cv2.imread(file_path)
+            #conversion color: from BGR (used by OpenCV) to RGB (used by PIL).
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            #create PIL image
             img_pil = Image.fromarray(img)
+            #resizing
             img_pil.thumbnail((300, 300))
+            #create Tkinter image (that can be displayed in the Label widget)
             self.nrt_image = ImageTk.PhotoImage(img_pil)
+            #update the Label with the uploaded image (and remove the text "No image loaded")
             self.nrt_image_label.configure(image=self.nrt_image, text="")
-
+    
+    #to update the list of registered user
     def update_registered_list(self):
+        #Check if the self object has an attribute called "registered_listbox"
         if hasattr(self, 'registered_listbox'):
             self.registered_listbox.delete(0, tk.END)
             if not self.known_embeddings:
-                self.registered_listbox.insert(tk.END, "No registered user")
+                self.registered_listbox.insert(tk.END, "No registered user".center(53))
             else:
                 for name in self.known_embeddings.keys():
-                    self.registered_listbox.insert(tk.END, name)
+                    self.registered_listbox.insert(tk.END, name.center(53))
 
+    #to Check if the faces in the uploaded image match those of registered users
     def verify_nrt_image(self):
         if not self.nrt_image_path:
             messagebox.showerror("Error", "Load an image first")
             return
-
+        
+        #read the image
         img = cv2.imread(self.nrt_image_path)
         if img is None:
             messagebox.showerror("Error", "Cannot open image")
             return
 
+        #Face detection using InsightFace model
         faces = self.app.get(img)
         if len(faces) == 0:
             messagebox.showerror("Error", "No face detected in the image")
             return
 
+        #Definition of the similarity thresholdb
         threshold = 0.6
         recognized_faces = []
         for face in faces:
@@ -262,12 +302,16 @@ class FaceRecognitionApp:
                 if similarity > max_similarity and similarity > threshold:
                     max_similarity = similarity
                     identity = name
+            #Storing recognised faces
             if identity:
                 recognized_faces.append((face, identity, max_similarity))
 
+        #Check if there are recognized faces in the recognized_faces list
         if recognized_faces:
             zoomed_faces = []
+            #For each face recognized
             for face, identity, sim in recognized_faces:
+                #Extract the coordinates of the bounding box, add a margin and crop the image
                 x1, y1, x2, y2 = face.bbox.astype(int)
                 h, w, _ = img.shape
                 margin = 20
@@ -276,22 +320,35 @@ class FaceRecognitionApp:
                 x2m = min(x2 + margin, w)
                 y2m = min(y2 + margin, h)
                 crop = img[y1m:y2m, x1m:x2m].copy()
+
+                #Draw a green box around the face and add the identity name.
                 cv2.rectangle(crop, (0, 0), (crop.shape[1]-1, crop.shape[0]-1), (0, 255, 0), 3)
-                cv2.putText(crop, identity, (5, crop.shape[0]-10),
-                            cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 255, 0), 3)
+                cv2.putText(crop, identity, (5, crop.shape[0]-10), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 255, 0), 3)
+                
+                #Resize the cropped image and add it to the zoomed_faces list.
                 zoom = cv2.resize(crop, (300, 300))
                 zoomed_faces.append(zoom)
+            
+            #If there are more enlarged faces, it combines them horizontally.
             if len(zoomed_faces) > 1:
                 combined = np.hstack(zoomed_faces)
             else:
                 combined = zoomed_faces[0]
+
+            #Converts the combined image to RGB    
             combined_rgb = cv2.cvtColor(combined, cv2.COLOR_BGR2RGB)
+            #Converts the combined image to PIL image
             pil_img = Image.fromarray(combined_rgb)
+            #create Tkinter image (that can be displayed in the Label widget)
             self.nrt_image = ImageTk.PhotoImage(pil_img)
+            #Update the Label widget to display the updated image.
             self.nrt_image_label.configure(image=self.nrt_image)
             
+            #Show names of recognized faces in a messagebox
             recognized_names = ', '.join([identity for (_, identity, _) in recognized_faces])
             messagebox.showinfo("Result", f"Recognized: {recognized_names}")
+        
+        #Management of unrecognized faces (draw red squares around the faces detected)
         else:
             annotated_image = img.copy()
             for face in faces:
@@ -304,28 +361,47 @@ class FaceRecognitionApp:
             self.nrt_image_label.configure(image=self.nrt_image)
             messagebox.showinfo("Result", "No registered face detected among those found")
 
-    def manage_users(self):
-        manage_window = tk.Toplevel(self.root)
-        manage_window.title("Manage Registered Users")
-        manage_window.geometry("400x400")
-        manage_window.configure(bg=BG_COLOR)
+    # ========================================================================
+    # Manage Users UI and Logic
+    # ========================================================================
+    def show_manage_users_ui(self):
+        # Hide main menu
+        self.main_frame.pack_forget()
         
-        lbl = ttk.Label(manage_window, text="Registered Users", font=(FONT_FAMILY, 14))
+        # Create manage users frame
+        self.manage_users_frame = ttk.Frame(self.root)
+        self.manage_users_frame.pack(expand=True, fill="both")
+        
+        # Back to menu button
+        ttk.Button(self.manage_users_frame, text="Back to Menu", 
+                 command=lambda: [self.manage_users_frame.destroy(), 
+                 self.main_frame.pack(expand=True, fill="both", padx=40, pady=40)], 
+                 style="TButton").pack(side="top", anchor="nw", padx=10, pady=10)
+        
+        # Main content
+        lbl = ttk.Label(self.manage_users_frame, text="Registered Users", font=(FONT_FAMILY, 14))
         lbl.pack(pady=10)
         
-        listbox = tk.Listbox(manage_window, selectmode=tk.MULTIPLE, font=(FONT_FAMILY, 12), bg=BUTTON_BG, fg=TEXT_COLOR, selectbackground=ACCENT_COLOR)
+        listbox = tk.Listbox(self.manage_users_frame, selectmode=tk.MULTIPLE, 
+                           font=(FONT_FAMILY, 16), bg=BUTTON_BG, fg=TEXT_COLOR, 
+                           selectbackground=ACCENT_COLOR)
         listbox.pack(expand=True, fill="both", padx=10, pady=10)
         
-        for name in self.known_embeddings.keys():
-            listbox.insert(tk.END, name)
+        self.registered_listbox = listbox
         
+        # Population of the user list
+        for name in self.known_embeddings.keys():
+            listbox.insert(tk.END, name.center(125))
+        
+        # Delete selected users functionality
         def delete_selected():
             selected_indices = listbox.curselection()
             if not selected_indices:
                 messagebox.showwarning("Warning", "Select at least one user to delete")
                 return
+            
             for index in reversed(selected_indices):
-                name = listbox.get(index)
+                name = listbox.get(index).strip()
                 if name in self.known_embeddings:
                     del self.known_embeddings[name]
                     listbox.delete(index)
@@ -333,7 +409,8 @@ class FaceRecognitionApp:
             self.update_registered_list()
             messagebox.showinfo("Success", "Selected users have been deleted!")
         
-        ttk.Button(manage_window, text="Delete Selected Users", command=delete_selected).pack(pady=10)
+        ttk.Button(self.manage_users_frame, text="Delete Selected Users", 
+                 command=delete_selected, style="TButton").pack(pady=10)
 
 if __name__ == "__main__":
     root = tk.Tk()
