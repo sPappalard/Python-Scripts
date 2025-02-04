@@ -115,7 +115,7 @@ The application stores face embeddings in a local file:
 ### Menu
 ![Gameplay Screenshot](screenshots/1.JPG)
 
-### Non Real-Time Recognition
+### Non Real-Time Recognition (Webcam source)
 ![Gameplay Screenshot](screenshots/2.JPG)
 
 ![Gameplay Screenshot](screenshots/3.JPG)
