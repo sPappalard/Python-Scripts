@@ -112,7 +112,19 @@ The application stores face embeddings in a local file:
 - Auto-saves after registration/deletion
 
 ## Screenshots
+### Menu
+![Gameplay Screenshot](screenshots/1.JPG)
 
+### Non Real-Time Recognition
+![Gameplay Screenshot](screenshots/2.JPG)
+
+![Gameplay Screenshot](screenshots/3.JPG)
+
+### Manage Registered Users
+![Gameplay Screenshot](screenshots/4.JPG)
+
+### Real-Time Recognition
+![Gameplay Screenshot](screenshots/5.JPG)
 
 
 ## Contributions
